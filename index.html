@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reddick Jesse Llanes — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-page: #F2F3F5; --bg-section-alt: #EAEBEE; --bg-card: #FFFFFF;
+    --bmw-blue: #1C3F7A; --bmw-blue-light: #2A5BAD;
+    --bmw-red: #CC0000; --bmw-red-light: #E02020;
+    --white: #FFFFFF; --text-primary: #0D1A2E; --text-muted: #5A6478;
+    --border: rgba(28,63,122,0.13); --border-strong: rgba(28,63,122,0.25);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg-page); color: var(--text-primary); font-size: 15px; line-height: 1.7; overflow-x: hidden; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1rem 3rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--border-strong); }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--bmw-blue); letter-spacing: 0.06em; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--bmw-blue); }
+
+  .hero { min-height: 100vh; display: flex; align-items: center; padding: 0 3rem; position: relative; overflow: hidden; background: var(--bmw-blue); }
+  .hero-stripe { position: absolute; top: 0; bottom: 0; right: 0; width: 38%; background: var(--white); clip-path: polygon(12% 0, 100% 0, 100% 100%, 0% 100%); }
+  .hero-stripe-accent { position: absolute; top: 0; bottom: 0; right: 38%; width: 6px; background: var(--bmw-red); }
+  .hero-content { max-width: 600px; position: relative; z-index: 2; }
+  .hero-eyebrow { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 500; margin-bottom: 1.2rem; opacity: 0; animation: fadeUp 0.6s 0.2s forwards; }
+  .hero-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5rem); font-weight: 300; line-height: 1.05; color: var(--white); margin-bottom: 0.3rem; opacity: 0; animation: fadeUp 0.6s 0.35s forwards; }
+  .hero-name span { color: var(--bmw-red); font-weight: 500; }
+  .hero-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: rgba(255,255,255,0.65); margin-bottom: 1.8rem; font-style: italic; opacity: 0; animation: fadeUp 0.6s 0.5s forwards; }
+  .hero-desc { font-size: 15px; color: rgba(255,255,255,0.7); max-width: 460px; margin-bottom: 2.5rem; line-height: 1.85; opacity: 0; animation: fadeUp 0.6s 0.65s forwards; }
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.6s 0.8s forwards; }
+  .btn-primary { padding: 0.75rem 1.8rem; background: var(--bmw-red); color: var(--white); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+  .btn-primary:hover { background: var(--bmw-red-light); transform: translateY(-1px); }
+  .btn-outline { padding: 0.75rem 1.8rem; background: transparent; color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border: 0.5px solid rgba(255,255,255,0.3); cursor: pointer; transition: color 0.2s, border-color 0.2s, transform 0.15s; }
+  .btn-outline:hover { color: var(--white); border-color: rgba(255,255,255,0.7); transform: translateY(-1px); }
+
+  section { padding: 6rem 3rem; }
+  .section-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bmw-red); font-weight: 500; margin-bottom: 0.6rem; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--bmw-blue); margin-bottom: 3rem; line-height: 1.15; }
+  .divider { width: 100%; height: 1px; background: linear-gradient(to right, var(--bmw-red) 60px, var(--border) 60px); margin-bottom: 4rem; }
+
+  #about { background: var(--white); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 5rem; align-items: start; }
+  .about-stats { display: flex; flex-direction: column; gap: 2rem; }
+  .stat-item { border-left: 3px solid var(--bmw-blue); padding-left: 1.25rem; }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 500; color: var(--bmw-blue); line-height: 1; margin-bottom: 0.2rem; }
+  .stat-label { font-size: 13px; color: var(--text-muted); }
+  .about-text p { color: var(--text-muted); margin-bottom: 1.2rem; font-size: 15px; line-height: 1.85; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  .tag { padding: 0.3rem 0.85rem; border: 0.5px solid var(--border-strong); font-size: 12px; color: var(--bmw-blue); letter-spacing: 0.05em; background: var(--bg-page); }
+
+  #experience { background: var(--bg-section-alt); }
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-item { display: grid; grid-template-columns: 200px 1fr; gap: 2rem; padding: 2rem 0; border-bottom: 0.5px solid var(--border-strong); }
+  .timeline-item:first-child { border-top: 0.5px solid var(--border-strong); }
+  .timeline-date { font-size: 13px; color: var(--text-muted); padding-top: 0.2rem; }
+  .timeline-role { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 500; color: var(--bmw-blue); margin-bottom: 0.2rem; }
+  .timeline-org { font-size: 13px; color: var(--bmw-red); margin-bottom: 0.7rem; }
+  .timeline-desc { font-size: 14px; color: var(--text-muted); line-height: 1.75; }
+  .timeline-bullets { list-style: none; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .timeline-bullets li { font-size: 14px; color: var(--text-muted); line-height: 1.7; padding-left: 1rem; position: relative; }
+  .timeline-bullets li::before { content: '–'; position: absolute; left: 0; color: var(--bmw-red); }
+  .badge { display: inline-block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.6rem; border: 0.5px solid var(--bmw-blue); color: var(--bmw-blue); margin-bottom: 0.6rem; margin-right: 0.4rem; background: rgba(28,63,122,0.05); }
+
+  #projects { background: var(--white); }
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .project-card { background: var(--bg-page); border: 0.5px solid var(--border-strong); border-top: 3px solid var(--bmw-blue); padding: 2rem; transition: border-top-color 0.2s, transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+  .project-card:hover { border-top-color: var(--bmw-red); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(28,63,122,0.08); }
+  .project-tag { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bmw-red); margin-bottom: 0.8rem; }
+  .project-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 500; color: var(--bmw-blue); margin-bottom: 0.7rem; }
+  .project-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.75; }
+
+  #certifications { background: var(--bg-section-alt); }
+  .certs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+  .cert-card { background: var(--white); border: 0.5px solid var(--border-strong); border-left: 3px solid var(--bmw-red); padding: 1.25rem 1.5rem; }
+  .cert-name { font-size: 14px; font-weight: 500; color: var(--bmw-blue); margin-bottom: 0.25rem; }
+  .cert-issuer { font-size: 13px; color: var(--text-muted); }
+
+  #contact { background: var(--bmw-blue); text-align: center; }
+  .contact-inner { max-width: 500px; margin: 0 auto; }
+  .contact-inner .section-label { color: rgba(255,255,255,0.5); }
+  .contact-inner .section-title { color: var(--white); }
+  .contact-email { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: rgba(255,255,255,0.85); text-decoration: none; display: block; margin: 1.5rem 0 2.5rem; transition: color 0.2s; }
+  .contact-email:hover { color: var(--white); }
+  .contact-inner p { color: rgba(255,255,255,0.6); }
+  .social-row { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+  .social-link { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s; border-bottom: 0.5px solid rgba(255,255,255,0.2); padding-bottom: 2px; }
+  .social-link:hover { color: var(--white); border-bottom-color: var(--white); }
+
+  footer { padding: 2rem 3rem; background: #0B1729; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Mobile Navigation ── */
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
+  .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--bmw-blue); transition: transform 0.3s, opacity 0.3s; }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── Responsive Breakpoints ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-hamburger { display: flex; }
+    .nav-links {
+      display: none; flex-direction: column; gap: 0;
+      position: fixed; top: 57px; left: 0; right: 0;
+      background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+      border-bottom: 0.5px solid var(--border-strong);
+      padding: 0.5rem 0 1rem; z-index: 99;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li a { display: block; padding: 0.75rem 1.5rem; font-size: 13px; }
+
+    .hero { padding: 6rem 1.5rem 4rem; }
+    .hero-stripe { width: 0; }
+    .hero-stripe-accent { display: none; }
+    .hero-content { max-width: 100%; }
+    .hero-name { font-size: clamp(2.4rem, 10vw, 3.5rem); }
+    .hero-title { font-size: 1.1rem; }
+    .hero-desc { font-size: 14px; max-width: 100%; }
+    .hero-cta { flex-direction: column; gap: 0.75rem; }
+    .btn-primary, .btn-outline { text-align: center; }
+
+    section { padding: 4rem 1.5rem; }
+
+    .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+
+    .timeline-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .timeline-date { font-size: 12px; color: var(--bmw-red); padding-top: 0; }
+
+    .projects-grid { grid-template-columns: 1fr; }
+    .certs-grid { grid-template-columns: 1fr; }
+
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 1.25rem; }
+
+    .section-title { font-size: clamp(1.75rem, 6vw, 2.5rem); margin-bottom: 2rem; }
+    .social-row { gap: 1rem; }
+    .contact-email { font-size: 1.2rem; }
+  }
+
+  @media (max-width: 400px) {
+    .hero-name { font-size: 2.2rem; }
+    section { padding: 3rem 1.25rem; }
+    .tag-row { gap: 0.4rem; }
+    .tag { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">RJL</div>
+  <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certifications">Certifications</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-stripe"></div>
+  <div class="hero-stripe-accent"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Business Administration · UC Riverside Fall 2026</p>
+    <h1 class="hero-name">Reddick Jesse<br><span>Llanes</span></h1>
+    <p class="hero-title">Operations, Administration &amp; Business Development</p>
+    <p class="hero-desc">Administrative and operations professional with experience across regulated and fast-paced professional environments. Building at the intersection of business, AI, and the automotive world.</p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">View My Work</a>
+      <a href="#contact" class="btn-outline">Get In Touch</a>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <p class="section-label">About Me</p>
+  <h2 class="section-title">Background &amp; Skills</h2>
+  <div class="divider"></div>
+  <div class="about-grid">
+    <div class="about-stats">
+      <div class="stat-item">
+        <div class="stat-num">Avid Bio</div>
+        <div class="stat-label">Warehouse Specialist · Regulated Operations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">DaVita</div>
+        <div class="stat-label">Administrative Assistant · 20+ locations coordinated</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">UCI FLI</div>
+        <div class="stat-label">Future Leaders Initiative · 2025 Cohort Member</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Co-founder</div>
+        <div class="stat-label">BAR — Automotive consulting startup</div>
+      </div>
+    </div>
+    <div class="about-text">
+      <p>I'm an operations and administrative professional with hands-on experience across regulated and fast-paced professional environments. At Avid Bioservices, I manage compliance-driven warehouse operations — from inventory controls and supply chain coordination to quality-overseen finished product handling and regulated shipments.</p>
+      <p>Previously at DaVita Healthcare, I coordinated complex administrative operations across 20+ locations, managing scheduling, equipment logistics, and order processing in a high-stakes setting.</p>
+      <p>Academically, I'm a Dean's List Honors student at Irvine Valley College, transferring to UC Riverside for Fall 2026. I was also selected for UCI's Future Leaders Initiative at the Paul Merage School of Business.</p>
+      <p>Outside of work and school, I co-founded BAR — an automotive startup — where I lead all operations, client communication, and business execution.</p>
+      <div class="tag-row">
+        <span class="tag">Warehouse Operations</span>
+        <span class="tag">Regulatory Compliance</span>
+        <span class="tag">Inventory Management</span>
+        <span class="tag">Supply Chain</span>
+        <span class="tag">Operations Coordination</span>
+        <span class="tag">Scheduling</span>
+        <span class="tag">Generative AI</span>
+        <span class="tag">Excel</span>
+        <span class="tag">Microsoft Office</span>
+        <span class="tag">Business Strategy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <p class="section-label">Resume</p>
+  <h2 class="section-title">Experience &amp; Education</h2>
+  <div class="divider"></div>
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-date">May 2026 — Present</div>
+      <div>
+        <p class="timeline-role">Warehouse Specialist</p>
+        <p class="timeline-org">Avid Bioservices · Tustin, CA</p>
+        <ul class="timeline-bullets">
+          <li>Manage comprehensive inventory controls and procedures in strict adherence to accounting and regulatory standards, executing monthly, quarterly, and annual physical audits to guarantee accuracy.</li>
+          <li>Coordinate the efficient movement of raw materials across purchasing, manufacturing, and quarantine stages, proactively monitoring re-order points to maintain seamless supply chain flow.</li>
+          <li>Enforce regulatory compliance within a fast-paced specialized warehouse, ensuring all SOPs, controlled forms, and tracking documents are accurately maintained and updated.</li>
+          <li>Support critical cross-functional operations under quality oversight, including finished product inventory management, product issuance, precision labeling, controlled storage, and execution of regulated shipments.</li>
+          <li>Optimize warehouse accessibility by strategically organizing raw materials and maintaining extensive cross-training in receiving, packaging, and shipping.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">Oct 2024 — May 2026</div>
+      <div>
+        <p class="timeline-role">Administrative Assistant</p>
+        <p class="timeline-org">DaVita Healthcare · Irvine, CA</p>
+        <ul class="timeline-bullets">
+          <li>Coordinated operational schedules across 20+ locations to optimize staffing efficiency.</li>
+          <li>Facilitated communication with cross-functional teams to ensure accurate staff assignments.</li>
+          <li>Managed logistics for equipment delivery to support uninterrupted operations.</li>
+          <li>Processed orders accurately to guarantee effective operational outcomes.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">2026 — Present</div>
+      <div>
+        <p class="timeline-role">Co-Founder &amp; Operations Lead</p>
+        <p class="timeline-org">BAR — BMW Pre-Purchase Consulting</p>
+        <p class="timeline-desc">Manage all scheduling, client communication, invoicing, and day-to-day execution. Coordinate across a three-person founding team with complementary skill sets in automotive expertise, tech, and operations.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">2025 Cohort</div>
+      <div>
+        <span class="badge">Leadership</span>
+        <p class="timeline-role">Future Leaders Initiative — Cohort Member</p>
+        <p class="timeline-org">UCI Paul Merage School of Business</p>
+        <p class="timeline-desc">Selected as one of the few community college students in Southern California. Received structured leadership development training in communication, team dynamics, personal branding, and strategic thinking. Explored business pathways in marketing, HR, finance, analytics, and program management.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">2024 — May 2026</div>
+      <div>
+        <span class="badge">Dean's List</span><span class="badge">Honors Program</span>
+        <p class="timeline-role">A.S. Business Administration — In Progress</p>
+        <p class="timeline-org">Irvine Valley College · Irvine, CA</p>
+        <p class="timeline-desc">Honors coursework: Principles of Microeconomics, Statistics for Business and Economics, Research and Writing, Principles of Macroeconomics, Communication Fundamentals, and Sociology.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">Fall 2026</div>
+      <div>
+        <p class="timeline-role">B.S. Business Administration — Incoming Transfer</p>
+        <p class="timeline-org">University of California, Riverside</p>
+        <p class="timeline-desc">Continuing focus on business operations, strategy, and management.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="projects">
+  <p class="section-label">Projects</p>
+  <h2 class="section-title">Work &amp; Ventures</h2>
+  <div class="divider"></div>
+  <div class="projects-grid">
+    <div class="project-card">
+      <p class="project-tag">Startup · Automotive</p>
+      <p class="project-name">BAR — Pre-Purchase BMW Consulting</p>
+      <p class="project-desc">Co-founded a lean consulting service helping buyers confidently purchase used BMWs. No upfront capital. Roles built around complementary skill sets: automotive expertise, technical development, and operations.</p>
+    </div>
+    <div class="project-card">
+      <p class="project-tag">Regulated Operations</p>
+      <p class="project-name">Compliance-Driven Warehouse Operations</p>
+      <p class="project-desc">Managing specialized warehouse operations at Avid Bioservices — overseeing inventory controls, supply chain coordination, quality-compliant product handling, and regulated shipments in a controlled environment.</p>
+    </div>
+    <div class="project-card">
+      <p class="project-tag">Multi-Site Administration</p>
+      <p class="project-name">Multi-Site Operations at DaVita</p>
+      <p class="project-desc">Coordinated complex administrative operations across 20+ locations — managing operational schedules, equipment logistics, order processing, and cross-team communication.</p>
+    </div>
+    <div class="project-card">
+      <p class="project-tag">Certification · AI</p>
+      <p class="project-name">Generative AI for Business Applications</p>
+      <p class="project-desc">Completed UCI Paul Merage School of Business certification in Generative AI — applying AI tools to enhance decision-making, operational efficiency, and business strategy.</p>
+    </div>
+  </div>
+</section>
+
+<section id="certifications">
+  <p class="section-label">Certifications</p>
+  <h2 class="section-title">Credentials &amp; Training</h2>
+  <div class="divider"></div>
+  <div class="certs-grid">
+    <div class="cert-card">
+      <p class="cert-name">Future Leaders Initiative — Certificate of Completion</p>
+      <p class="cert-issuer">UCI Paul Merage School of Business · 2025</p>
+    </div>
+    <div class="cert-card">
+      <p class="cert-name">Generative AI for Business Application</p>
+      <p class="cert-issuer">UCI Paul Merage School of Business</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-inner">
+    <p class="section-label">Contact</p>
+    <h2 class="section-title">Let's Connect</h2>
+    <p style="font-size:15px; margin-bottom:0;">Open to opportunities, collaborations, and conversations. Reach out directly.</p>
+    <a href="mailto:imrjllanes@gmail.com" class="contact-email">imrjllanes@gmail.com</a>
+    <div class="social-row">
+      <a href="https://www.linkedin.com/in/reddick-jesse-llanes-1581a62a0" class="social-link" target="_blank">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Reddick Jesse Llanes</span>
+  <span>Aliso Viejo, CA</span>
+</footer>
+
+
+<script>
+  const hamburger = document.querySelector('.nav-hamburger');
+  const navLinks = document.querySelector('.nav-links');
+  hamburger.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+    hamburger.setAttribute('aria-expanded', open);
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    });
+  });
+</script>
+</body>
+</html>
