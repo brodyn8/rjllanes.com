@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QQQ / NQ Arbitrage Backtester</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0f14; --panel:#141923; --panel2:#1a2130; --line:#252e40;
+  --text:#dde4ef; --dim:#8b97ab; --faint:#5a6478;
+  --green:#2ecc8f; --red:#ff5d6c; --amber:#ffb84d; --blue:#5b9cff; --purple:#b07cff;
+  --mono:'DM Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5}
+a{color:var(--blue);text-decoration:none}
+header{display:flex;align-items:baseline;gap:14px;padding:18px 24px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:19px;font-weight:700;letter-spacing:.3px}
+header .sub{color:var(--dim);font-size:13px}
+header .back{margin-left:auto;font-size:13px;color:var(--faint)}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 24px 60px}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel h2{font-size:12px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px}
+.panel + .panel{margin-top:18px}
+label{display:block;font-size:12px;color:var(--dim);margin:10px 0 3px}
+label:first-of-type{margin-top:0}
+input[type=number],input[type=text],select{
+  width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+  color:var(--text);padding:7px 9px;font-family:var(--mono);font-size:13px;outline:none}
+input:focus,select:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--text);cursor:pointer}
+.check input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer}
+button{cursor:pointer;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-weight:500}
+.btn-run{width:100%;margin-top:16px;padding:11px;background:var(--blue);color:#fff;font-size:15px;font-weight:700;letter-spacing:.3px}
+.btn-run:hover{filter:brightness(1.12)}
+.btn-sm{padding:6px 12px;background:var(--panel2);border:1px solid var(--line);color:var(--text);font-size:12px}
+.btn-sm:hover{border-color:var(--blue)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .v{font-family:var(--mono);font-size:19px;font-weight:500;margin-top:2px}
+.kpi .l{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+.pos{color:var(--green)} .neg{color:var(--red)} .neu{color:var(--amber)}
+.chart-box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 14px 8px;margin-bottom:18px}
+.chart-box h3{font-size:12px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;display:flex;gap:14px;align-items:baseline}
+.chart-box h3 .legend{font-weight:400;text-transform:none;letter-spacing:0;font-size:12px}
+.chart-box canvas{width:100%;display:block;cursor:crosshair}
+.tvchart{height:230px;display:none}
+.tv-sym.active{border-color:var(--blue);color:var(--text)}
+.readout{font-family:var(--mono);font-size:11.5px;color:var(--faint);height:18px;overflow:hidden;white-space:nowrap}
+.signal{border-left:4px solid var(--amber);background:var(--panel);border-radius:10px;padding:14px 16px;margin-bottom:18px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.signal .head{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.signal .body{font-family:var(--mono);font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{color:var(--dim);font-weight:500;text-align:right;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+td{font-family:var(--mono);text-align:right;padding:6px 9px;border-bottom:1px solid #1c2333;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr:hover td{background:#181f2d}
+.scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-family:'DM Sans';font-weight:700}
+.tag.long{background:rgba(46,204,143,.15);color:var(--green)}
+.tag.short{background:rgba(255,93,108,.15);color:var(--red)}
+.exit-target{color:var(--green)} .exit-stop{color:var(--red)} .exit-time{color:var(--amber)} .exit-session{color:var(--dim)} .exit-eod{color:var(--dim)}
+.note{font-size:12px;color:var(--faint);margin-top:10px;line-height:1.55}
+.warn{color:var(--amber)}
+.quality{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.7}
+.sweep-table td{cursor:pointer}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;color:var(--dim);padding:8px 16px;font-size:13px;border-radius:7px 7px 0 0;border:1px solid transparent}
+.tabs button.active{color:var(--text);background:var(--panel);border:1px solid var(--line);border-bottom-color:var(--panel)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.filebox{margin-top:8px}
+.filebox input[type=file]{font-size:12px;color:var(--dim);width:100%}
+.statusline{font-size:12px;font-family:var(--mono);margin-top:8px;min-height:16px}
+hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>QQQ ⇄ NQ Arbitrage Backtester</h1>
+  <span class="sub">Rolling-OLS spread &middot; z-score mean reversion &middot; deviation from equilibrium → short the rich leg, long the cheap leg</span>
+  <a class="back" href="../index.html">← rjllanes.com</a>
+</header>
+
+<div class="wrap">
+<div class="grid">
+
+  <!-- ===================== LEFT: CONTROLS ===================== -->
+  <div>
+    <div class="panel">
+      <h2>Data</h2>
+      <label>Dataset</label>
+      <select id="dataset">
+        <option value="1d">Bundled — Daily, 2 years</option>
+        <option value="30m" selected>Bundled — 30-minute, 60 days</option>
+        <option value="5m">Bundled — 5-minute, 60 days</option>
+        <option value="csv">My own CSVs (upload below)</option>
+      </select>
+      <div id="bundled-info" class="note"></div>
+      <div id="csv-zone" style="display:none">
+        <div class="filebox"><label>QQQ bars (CSV)</label><input type="file" id="file-qqq" accept=".csv,.txt"></div>
+        <div class="filebox"><label>NQ / MNQ bars (CSV)</label><input type="file" id="file-nq" accept=".csv,.txt"></div>
+        <div class="note">Accepts NinjaTrader exports (<span style="font-family:var(--mono)">yyyyMMdd HHmmss;O;H;L;C;V</span>),
+        TradingView exports, or Yahoo CSVs. Both files must be the same bar interval.</div>
+        <div class="statusline" id="csv-status"></div>
+      </div>
+      <button class="btn-sm" id="btn-refresh" style="margin-top:10px">↻ Refresh from Yahoo (live)</button>
+      <div class="statusline" id="fetch-status"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Signal</h2>
+      <div class="row2">
+        <div><label>Lookback (bars)</label><input type="number" id="p-length" value="60" min="10" max="2000"></div>
+        <div><label>Hedge model</label>
+          <select id="p-model">
+            <option value="ols" selected>Rolling OLS</option>
+            <option value="ratio">Rolling ratio</option>
+          </select></div>
+      </div>
+      <div class="row3">
+        <div><label>Entry Z</label><input type="number" id="p-entryz" value="2.0" step="0.1"></div>
+        <div><label>Exit Z</label><input type="number" id="p-exitz" value="0.3" step="0.1"></div>
+        <div><label>Stop Z</label><input type="number" id="p-stopz" value="3.5" step="0.1"></div>
+      </div>
+      <div class="row2">
+        <div><label>Time stop (bars, 0=off)</label><input type="number" id="p-maxbars" value="0" min="0"></div>
+        <div><label>Cooldown after stop</label><input type="number" id="p-cooldown" value="0" min="0"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="p-rth" checked> RTH only (9:30–15:55 ET, intraday data)</label>
+    </div>
+
+    <div class="panel">
+      <h2>Execution &amp; Costs</h2>
+      <div class="row2">
+        <div><label>Contract</label>
+          <select id="p-contract">
+            <option value="NQ">NQ ($20 / pt)</option>
+            <option value="MNQ" selected>MNQ ($2 / pt)</option>
+          </select></div>
+        <div><label>Contracts</label><input type="number" id="p-qty" value="1" min="1" max="100"></div>
+      </div>
+      <div class="row2">
+        <div><label>Legs</label>
+          <select id="p-legs">
+            <option value="both" selected>Futures + QQQ hedge</option>
+            <option value="fut">Futures only (as run on NT)</option>
+          </select></div>
+        <div><label>Fill at</label>
+          <select id="p-exec">
+            <option value="nextOpen" selected>Next bar open (NT-like)</option>
+            <option value="close">Signal bar close</option>
+          </select></div>
+      </div>
+      <div class="row2">
+        <div><label>Fut comm / side / ct ($)</label><input type="number" id="p-futcomm" value="0.62" step="0.01"></div>
+        <div><label>Fut slippage (ticks/side)</label><input type="number" id="p-futslip" value="1" step="0.5" min="0"></div>
+      </div>
+      <div class="row2">
+        <div><label>QQQ comm / share ($)</label><input type="number" id="p-eqcomm" value="0.005" step="0.001"></div>
+        <div><label>QQQ slip (¢ / share / side)</label><input type="number" id="p-eqslip" value="1" step="0.5" min="0"></div>
+      </div>
+      <label>Capital base ($, for % metrics)</label>
+      <input type="number" id="p-capital" value="25000" step="1000">
+      <button class="btn-run" id="btn-run">Run Backtest</button>
+    </div>
+  </div>
+
+  <!-- ===================== RIGHT: RESULTS ===================== -->
+  <div>
+    <div class="signal" id="signal-panel" style="display:none">
+      <div class="head">Latest bar — equilibrium read</div>
+      <div class="body" id="signal-body"></div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="chart-box">
+      <h3>Prices <span class="legend"><span style="color:var(--blue)">■</span> QQQ &nbsp;<span style="color:var(--purple)">■</span> NQ &nbsp;(normalized = 100 at window start)</span></h3>
+      <canvas id="ch-price" height="190"></canvas>
+      <div class="tvchart" id="tv-price"></div>
+      <div class="readout" id="ro-price"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>Spread Z-score <span class="legend">deviation from rolling equilibrium &middot; <span style="color:var(--green)">▲</span> long spread &nbsp;<span style="color:var(--red)">▼</span> short spread &nbsp;<span style="color:var(--dim)">●</span> exit</span></h3>
+      <canvas id="ch-z" height="190"></canvas>
+      <div class="tvchart" id="tv-z"></div>
+      <div class="readout" id="ro-z"></div>
+    </div>
+
+    <div class="chart-box">
+      <h3>Equity Curve <span class="legend">mark-to-market, net of costs</span></h3>
+      <canvas id="ch-eq" height="190"></canvas>
+      <div class="tvchart" id="tv-eq"></div>
+      <div class="readout" id="ro-eq"></div>
+    </div>
+
+    <div class="panel">
+      <div class="tabs">
+        <button class="active" data-tab="trades">Trades</button>
+        <button data-tab="sweep">Parameter Sweep</button>
+        <button data-tab="quality">Data Quality</button>
+        <button data-tab="tvlive">TradingView Live</button>
+      </div>
+
+      <div class="tab-pane active" id="tab-trades">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span class="note" id="trades-summary" style="margin:0"></span>
+          <button class="btn-sm" id="btn-export">⬇ Export CSV</button>
+        </div>
+        <div class="scroll"><table id="trades-table">
+          <thead><tr>
+            <th>#</th><th>Side</th><th>Entry</th><th>Exit</th><th>Bars</th>
+            <th>Z in</th><th>Z out</th><th>Reason</th><th>Fut P&amp;L</th><th>Hedge P&amp;L</th><th>Costs</th><th>Net</th>
+          </tr></thead><tbody></tbody>
+        </table></div>
+      </div>
+
+      <div class="tab-pane" id="tab-sweep">
+        <div class="row3" style="max-width:640px">
+          <div><label>Lookback values</label><input type="text" id="sweep-lengths" value="20, 40, 60, 90, 120, 180"></div>
+          <div><label>Entry Z values</label><input type="text" id="sweep-entries" value="1.0, 1.5, 2.0, 2.5, 3.0"></div>
+          <div><label>&nbsp;</label><button class="btn-sm" id="btn-sweep" style="width:100%;padding:9px">Run Sweep</button></div>
+        </div>
+        <div class="note">Net P&amp;L ($) for every lookback × entry-Z combo, all other settings as configured. Click a cell to load those parameters.</div>
+        <div id="sweep-out" style="margin-top:12px;overflow:auto"></div>
+      </div>
+
+      <div class="tab-pane" id="tab-quality">
+        <div class="quality" id="quality-out">Run a backtest first.</div>
+      </div>
+
+      <div class="tab-pane" id="tab-tvlive">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+          <button class="btn-sm tv-sym active" data-sym="NASDAQ:QQQ">QQQ</button>
+          <button class="btn-sm tv-sym" data-sym="NASDAQ:NDX">NDX</button>
+          <button class="btn-sm tv-sym" data-sym="CAPITALCOM:US100">US100 (NQ proxy)</button>
+          <span style="color:var(--faint);font-size:12px;margin:0 4px">on tradingview.com:</span>
+          <a class="btn-sm" style="text-decoration:none" target="_blank" rel="noopener"
+             href="https://www.tradingview.com/chart/?symbol=CME_MINI%3ANQ1%21">NQ1! ↗</a>
+          <a class="btn-sm" style="text-decoration:none" target="_blank" rel="noopener"
+             href="https://www.tradingview.com/chart/?symbol=CME_MINI%3ANQ1%21%2FNASDAQ%3AQQQ">NQ ÷ QQQ ratio ↗</a>
+        </div>
+        <div id="tv-embed" style="height:540px;border:1px solid var(--line);border-radius:8px;overflow:hidden"></div>
+        <div class="note">Live TradingView chart. TradingView's free embed doesn't license CME futures or spread symbols,
+        so NQ1! and the NQ÷QQQ ratio open on tradingview.com (the ratio is the raw equilibrium — when it stretches away
+        from its recent range, that's the same deviation the z-score measures). US100 is a CFD that tracks NQ nearly 1:1.</div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:14px">
+      <b>Read this:</b> this is statistical arbitrage, not riskless arbitrage — the spread mean-reverts on average, it is not pinned.
+      The bundled NQ series is Yahoo's unadjusted front-month continuous (<span style="font-family:var(--mono)">NQ=F</span>), so quarterly
+      roll gaps (Mar/Jun/Sep/Dec) appear as artificial spread jumps; check the Data Quality tab and treat trades flagged near rolls as suspect.
+      For serious validation, export clean bars from your broker and upload them. Past performance ≠ future results.
+      Result charts powered by <a href="https://www.tradingview.com/lightweight-charts/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a>;
+      live chart by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a>.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
